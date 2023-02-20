@@ -1,0 +1,27 @@
+node('built-in')
+{
+   stage ('continuousdownload')
+{
+     
+  git 'https://github.com/Somasekhardevarakonda/somu.git'
+}
+stage ('continuousbuild')
+{
+   sh 'mvn package'
+}
+ stage('continuousdeployment')
+ {
+     deploy adapters: [tomcat9(credentialsId: '30b72d59-c25d-4868-b493-d2199c0cf444', path: '', url: 'http://172.31.30.38:8080')], contextPath: 'test', war: '**/*.war'
+   }
+ stage ('continuoustesting')
+ {
+     git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+     sh 'java -jar /var/lib/jenkins/workspace/pipeline/testing.jar'
+ }
+ stage ('continuousdelivery')
+ {
+     input message: 'need approval from DM', submitter: 'sekhar'
+     deploy adapters: [tomcat9(credentialsId: '30b72d59-c25d-4868-b493-d2199c0cf444', path: '', url: 'http://172.31.29.99:8080')], contextPath: 'prodapp', war: '**/*.war'
+ }
+ }
+ 
